@@ -1,0 +1,10 @@
+# Keyboard ID (Use `Get_key_codes.lua` to get kbID)
+keyboard_id=PID_FF0F
+
+# Where to write the ASCII code of the pressed key (LuaMacros to AutoHotkey communication)
+keyfile=D:\Scripts\MacroKeyboard\key.txt
+
+# OBS Studio OBS-Websocket plugin details
+obs_host=127.0.0.1
+obs_port=4444
+obs_pass=password
