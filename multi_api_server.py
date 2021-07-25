@@ -305,7 +305,7 @@ class Main():
         )
 
         self.responses = {
-            0: "Ok.",
+            0: "OK.",
             1: "Blocked.",
             2: "Unknown command.",
             3: "Invalid parameter."
