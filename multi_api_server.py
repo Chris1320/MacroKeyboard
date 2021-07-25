@@ -259,12 +259,14 @@ class Main():
 
         if not self._initialized: return 1
 
+        print("[i] Starting...")
+
         self.VoicemeeterAPI.start_voicemeeter()  # Starts Voicemeeter application on system.
 
         # Start listening on <self.server>:<self.port>
         print(f"Starting to listen on `{self.api_server[0]}:{self.api_server[1]}`.")
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
-            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            # server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             server.bind(self.api_server)
             server.listen(5)
             while True:
@@ -274,7 +276,7 @@ class Main():
                 print("Data:",data)  # DEV0005
                 if "--shutdown" in data:
                     print("[i] Shutdown recieved. Now quitting.")
-                    server.sendall(pickle.dumps(self.responses[0]))
+                    client.sendall(pickle.dumps(self.responses[0]))
                     return 0
 
                 elif ("--help" in data) or "-h" in data:
@@ -287,11 +289,12 @@ class Main():
 --help        -h        Show this help menu.
 --shutdown              Shutdown the server.
 """
-                    server.sendall(pickle.dumps(helpstring))
+                    client.sendall(pickle.dumps(helpstring))
 
                 else:
-                    server.sendall(pickle.dumps(self.parse_data(data)))
+                    client.sendall(pickle.dumps(self.parse_data(data)))
 
+                print("Communication done.\n")
                 continue
 
 
