@@ -50,11 +50,23 @@ class Main():
         self.api_server = (self.config.get("host"), self.config.get("port"))
 
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client.connect(self.api_server)
+        try:
+            self.client.connect(self.api_server)
+
+        except(ConnectionRefusedError):
+            print("ERROR: The server refused the connection.")
+            return 1
+
+        except(TimeoutError):
+            print("ERROR: The server has failed to respond.")
+            return 2
 
         # Send the command to the server.
-        self.client.send(pickle.dumps(sys.argv))
+        self.client.sendall(pickle.dumps(sys.argv))
+        response = pickle.loads(self.client.recv(4096))
+        print(response)
         self.client.close()  # Close the connection.
+        return 0
 
 
 if __name__ == "__main__":

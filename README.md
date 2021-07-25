@@ -9,10 +9,13 @@ Bare:
 - LuaMacros
 - AutoHotkey
 - Python
+  - PyCryptodomex
+  - toml
+  - websocket
 
 Additional:
 
-- Voicemeeter (Banana Edition)
+- Voicemeeter (Tested only on *Banana Edition*)
 - OBS Studio (with OBS-Websocket plugin)
 
 ## Credits

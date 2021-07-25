@@ -7,7 +7,9 @@ client command and execute API commands.
 """
 
 import os
+import pickle
 import sys
+import pickle
 import socket
 # import requests
 import voicemeeter
@@ -233,8 +235,20 @@ class Main():
         self.obs_host = self.config.get("obs_host")
         self.obs_port = self.config.get("obs_port")
         self.obs_pass = self.config.get("obs_pass")
+        self.api_server = (self.config.get("host"), self.config.get("port"))
+
+        self.responses = {
+            0: b"Ok."
+        }
 
         self._initialized = True
+
+    def parse_data(self):
+        """
+        Parse the command-line arguments from the client.
+        """
+
+        pass
 
     def main(self):
         """
@@ -245,10 +259,41 @@ class Main():
 
         if not self._initialized: return 1
 
-        self.VoicemeeterAPI().start_voicemeeter()  # Starts Voicemeeter application on system.
+        self.VoicemeeterAPI.start_voicemeeter()  # Starts Voicemeeter application on system.
 
         # Start listening on <self.server>:<self.port>
-        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print(f"Starting to listen on `{self.api_server[0]}:{self.api_server[1]}`.")
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            server.bind(self.api_server)
+            server.listen(5)
+            while True:
+                client, address = server.accept()
+                print(f"Accepted connection from `{address}`.")
+                data = pickle.loads(client.recv(4096))
+                print("Data:",data)  # DEV0005
+                if "--shutdown" in data:
+                    print("[i] Shutdown recieved. Now quitting.")
+                    server.sendall(pickle.dumps(self.responses[0]))
+                    return 0
+
+                elif ("--help" in data) or "-h" in data:
+                    # This is the help panel of the program.
+                    # These are the commands available from the client,
+                    # NOT for the server.
+                    helpstring = f"""
+{sys.argv[0]}
+
+--help        -h        Show this help menu.
+--shutdown              Shutdown the server.
+"""
+                    server.sendall(pickle.dumps(helpstring))
+
+                else:
+                    server.sendall(pickle.dumps(self.parse_data(data)))
+
+                continue
+
 
 if __name__ == "__main__":
     sys.exit(Main().main())
