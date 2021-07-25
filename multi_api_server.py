@@ -248,6 +248,7 @@ class Main():
         self.VoicemeeterAPI().start_voicemeeter()  # Starts Voicemeeter application on system.
 
         # Start listening on <self.server>:<self.port>
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 if __name__ == "__main__":
     sys.exit(Main().main())

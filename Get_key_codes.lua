@@ -8,5 +8,5 @@ lmc_print_devices()
 -- defines callback for device MACROS
 lmc_set_handler('MACROS' ,function(button, direction)
   if (direction == 1) then return end  -- ignore down
-  print(button) -- print button code
+  print("Button Pressed: " .. button) -- print button code
 end)

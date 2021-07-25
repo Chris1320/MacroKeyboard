@@ -279,7 +279,7 @@ class Main():
 			Process(
 				name = "AutoHotkey",
 				proc_name = "AutoHotkey.exe",
-				path = "D:\Scripts\MacroKeyboard\Main.ahk",
+				path = "D:\Scripts\MacroKeyboard\main.ahk",
 				use_subprocess = False,
 				restartable = True
 			)

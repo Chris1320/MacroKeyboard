@@ -11,3 +11,7 @@ keyfile=D:\Scripts\MacroKeyboard\key.txt
 obs_host=127.0.0.1
 obs_port=4444
 obs_pass=password
+
+# multi_api_*.py configuration
+host=127.0.0.1
+port=8642
