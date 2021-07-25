@@ -1,38 +1,41 @@
+local string = require "string";
+local io = require "io";  -- For file operations
 
--- Keyboard id for 2nd keyboard
--- If you dont know the id of you secondary keyboard you can use Get_keycode.lua
--- Which you will also find in this repository
-local kbID = 'PID_FF0F';
--- The filepath where to write the keys
-local keyfile = "D:\\Scripts\\MacroKeyboard\\key.txt";
+-- Change the path here if you want to use a different configuration file.
+local configfile = "./config.txt";
 
--- minimizes the luamacros window
-lmc.minimizeToTray = true
-lmc_minimize()
-clear() -- clears the luamacros terminal
+function split_str(inputstr, sep) -- From `https://stackoverflow.com/a/7615129/15376542`
+    if sep == nil then  -- If separator is nil then use whitespace.
+        sep = "%s";
+    end
 
-lmc_device_set_name('MACROS',kbID); -- asigns a logical name to our secondary keyboard
+    local result = {};
 
-lmc_print_devices() -- prints all devices, you should se a device named MACROS
+    for i in string.gmatch(inputstr, "([^"..sep.."]+)") do
+        table.insert(result, i);
+    end
 
--- function to write the key codes to file: key.txt
-write_to_file = function (key)
-    print("Button: " .. key)
-    print("====================")
-    local file = io.open(keyfile, "w")
-    file:write(key)
-    file:flush() -- flush = save
-    file:close()
-    lmc_send_keys('{F24}')  -- Triggers the F24 key to tell autohotkey to read the key.txt file
+    return result;
 end
 
+local kbID = nil;
+local keyfile = nil;
+
+-- Read config file.
+local config = io.open(configfile, 'r'):read("*all");
+local config = split_str(config, '\n');  -- Convert config file to a table.
+
+for line, value in pairs(config) do
+    -- Parse config data
+    if string.find(value, "keyboard_id=") ~= nil then
+        kbID = split_str(value, '=')[2];
+
+    elseif string.find(value, "keyfile=") ~= nil then
+        keyfile = split_str(value, '=')[2];
+    end
+end
+
+print("Keyboard ID: " .. kbID)
+print("Keyfile:     " .. keyfile)
+
 print("Waiting...")
-print()
-print("====================")
--- define callback device MACROS 
-lmc_set_handler('MACROS' ,function(button, direction)
-
-  if (direction == 1) then return end  -- ignore down
-  write_to_file(button) -- executes function write_to_file with argument button (button = the ascii code of that key)
-
-end)

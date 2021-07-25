@@ -1,4 +1,7 @@
-# Keyboard ID (Use `Get_key_codes.lua` to get kbID)
+# Keyboard ID of the 2nd keyboard (Use `Get_key_codes.lua` to get kbID)
+# If you dont know the ID of your secondary keyboard,
+# you can use `Get_key_codes.lua` which you will also
+# find in this repository.
 keyboard_id=PID_FF0F
 
 # Where to write the ASCII code of the pressed key (LuaMacros to AutoHotkey communication)
