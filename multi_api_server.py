@@ -200,6 +200,28 @@ class VoicemeeterAPI():
 
         return None
 
+    def gain(self, channel: str, index: int, value: float, absolute: bool = True):
+        """
+        Adjust gain of an input/output.
+
+        :param str channel: Either "input" or "output".
+        :param int index: Strip/Bus number. (Index starts at 1)
+        :param float value: The value of the gain slider.
+        :param bool absolute: Set `True` to set the value instead of
+                            adding to the current gain value. (Optional)
+
+        :returns void:
+        """
+
+        if channel == "input":
+            self._gain_input(index - 1, value, absolute)
+
+        elif channel == "output":
+            self._gain_output(index - 1, value, absolute)
+
+        else:
+            raise ValueError("Invalid channel value.")
+
 
 class OBSWebSocketAPI():
     """
@@ -315,12 +337,16 @@ class Main():
                         f"""
 {data[0]} voicemeeter <commands> <parameters>
 
-Commands:
+Commands: (All index starts at 1)
 
-start                                                     Start Voicemeeter.
-restart                                                   Restarts voicemeeter audio engine.
-mute <input|output> <strip/bus index> <true|false>        Mute an input/output. (Index starts at 1)
-solo <strip index> <true|false>                           Sets the "solo" state of a strip.
+start                                                             Start Voicemeeter.
+restart                                                           Restarts voicemeeter audio engine.
+gain <input|output> <strip/bus index> <value> <absolute>          Set gain for a strip/bus.
+                                            value:    value of the gain slider (-60.0 ~ 12.0)
+                                            absolute: if false, add <value> to current value.
+                                                      (Optional; defaults to `true`)
+mute <input|output> <strip/bus index> <true|false>                Mute an input/output.
+solo <strip index> <true|false>                                   Sets the "solo" state of a strip.
 """
                     ]
 
@@ -332,6 +358,53 @@ solo <strip index> <true|false>                           Sets the "solo" state 
                     elif command == "restart":
                         self.VoicemeeterAPI.restart()
                         return [0, self.responses[0]]
+
+                    elif command == "gain":
+                        try:  # <input|output>
+                            if data[i + 2] == "input":
+                                channel = "input"
+
+                            elif data[i + 2] == "output":
+                                channel = "output"
+
+                            else:
+                                return [3, self.responses[3]]
+
+                        except(IndexError):
+                            return [3, self.responses[3]]
+
+                        try:  # <strip/bus index>
+                            index = int(data[i + 3])
+
+                        except(IndexError, TypeError):
+                            return [3, self.responses[3]]
+
+                        try:  # <value>
+                            value = float(data[i + 4])
+
+                        except(IndexError, TypeError):
+                            return [3, self.responses[3]]
+
+                        try:  # <absolute>
+                            if data[i + 5] == "true":
+                                absolute = True
+
+                            elif data[i + 5] == "false":
+                                absolute = False
+
+                            else:
+                                absolute = True
+
+                        except(IndexError):
+                            absolute = True
+
+                        # Send the API call.
+                        try:
+                            self.VoicemeeterAPI.gain(channel, index, value, absolute)
+                            return [0, self.responses[0]]
+
+                        except IndexError:
+                            return [3, self.responses[3]]
 
                     elif command == "mute":
                         # First, get the parameters.
