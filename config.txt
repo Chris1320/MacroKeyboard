@@ -15,3 +15,6 @@ obs_pass=password
 # multi_api_*.py configuration
 host=127.0.0.1
 port=8642
+
+# This is the list of addresses that will run the client, separated by commas. (,)
+whitelist=127.0.0.1

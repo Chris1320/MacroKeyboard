@@ -59,14 +59,14 @@ class Main():
 
         except(TimeoutError):
             print("ERROR: The server has failed to respond.")
-            return 2
+            return 1
 
         # Send the command to the server.
         self.client.sendall(pickle.dumps(sys.argv))
         response = pickle.loads(self.client.recv(4096))
-        print(response)
+        print(response[1])
         self.client.close()  # Close the connection.
-        return 0
+        return response[0]
 
 
 if __name__ == "__main__":

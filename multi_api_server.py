@@ -236,19 +236,38 @@ class Main():
         self.obs_port = self.config.get("obs_port")
         self.obs_pass = self.config.get("obs_pass")
         self.api_server = (self.config.get("host"), self.config.get("port"))
+        self.client_address_whitelist = self.config.get("whitelist").split(',')
 
         self.responses = {
-            0: b"Ok."
+            0: "Ok.",
+            1: "Blocked.",
+            2: "Unknown command."
         }
 
         self._initialized = True
 
-    def parse_data(self):
+    def parse_data(self, data: list):
         """
         Parse the command-line arguments from the client.
+
+        :param list data: Data sent by the client.
+
+        :returns list: The error code and command output. `[<errcode>, <output>]`
         """
 
-        pass
+        i = 1  # iterator
+
+        # * The iterator starts with 1 because 0 is the filename.
+
+        while i < len(data):
+            if data[i].startswith("voicemeeter"):
+                return [0, "Will do something in Voicemeeter."]
+
+            elif data[i].startswith("obs"):
+                return [0, "Will do something in OBS Studio."]
+
+            else:
+                return [2, self.responses[2]]
 
     def main(self):
         """
@@ -271,12 +290,18 @@ class Main():
             server.listen(5)
             while True:
                 client, address = server.accept()
-                print(f"Accepted connection from `{address}`.")
+                # Check the whitelist first.
+                if address[0] not in self.client_address_whitelist:
+                    print(f"[!] Connection blocked from `{address[0]}:{address[1]}`.")
+                    client.sendall(pickle.dumps([1, self.responses[1]]))
+                    continue
+
+                print(f"Accepted connection from `{address[0]}:{address[1]}`.")
                 data = pickle.loads(client.recv(4096))
                 print("Data:",data)  # DEV0005
                 if "--shutdown" in data:
                     print("[i] Shutdown recieved. Now quitting.")
-                    client.sendall(pickle.dumps(self.responses[0]))
+                    client.sendall(pickle.dumps([0, self.responses[0]]))
                     return 0
 
                 elif ("--help" in data) or "-h" in data:
@@ -289,7 +314,7 @@ class Main():
 --help        -h        Show this help menu.
 --shutdown              Shutdown the server.
 """
-                    client.sendall(pickle.dumps(helpstring))
+                    client.sendall(pickle.dumps([0, helpstring]))
 
                 else:
                     client.sendall(pickle.dumps(self.parse_data(data)))
