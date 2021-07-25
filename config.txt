@@ -7,10 +7,14 @@ keyboard_id=PID_FF0F
 # Where to write the ASCII code of the pressed key (LuaMacros to AutoHotkey communication)
 keyfile=D:\Scripts\MacroKeyboard\key.txt
 
+# Voicemeeter API details (See `VoicemeeterAPI().kinds` for more info)
+voicemeeter_kind=1
+
 # OBS Studio OBS-Websocket plugin details
 obs_host=127.0.0.1
 obs_port=4444
 obs_pass=password
+obs_path=C:\Program Files\obs-studio\bin\64bit\obs64.exe
 
 # multi_api_*.py configuration
 host=127.0.0.1

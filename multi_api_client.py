@@ -63,7 +63,12 @@ class Main():
 
         # Send the command to the server.
         self.client.sendall(pickle.dumps(sys.argv))
-        response = pickle.loads(self.client.recv(4096))
+        try:
+            response = pickle.loads(self.client.recv(4096))
+
+        except EOFError as e:
+            print(f"ERROR: {e} (Most likely the server crashed.)")
+
         print(response[1])
         self.client.close()  # Close the connection.
         return response[0]

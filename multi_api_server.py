@@ -78,23 +78,6 @@ class VoicemeeterAPI():
 
         return None
 
-    def _solo_input(self, channel: int, state: bool = None):
-        """
-        Sets the "solo" state of a strip.
-
-        :param int channel: Strip number. (Index starts at 0)
-        :param bool state: Set `True` to activate solo mode. (Optional)
-
-        :returns void:
-        """
-
-        if state is None:
-            state = not self.remote.inputs[channel].solo  # Invert value of mute.
-
-        self.remote.inputs[channel].solo = state
-
-        return None
-
     def _gain_input(self, channel: int, value: float, absolute: bool = True):
         """
         Sets the gain value of a strip.
@@ -180,13 +163,56 @@ class VoicemeeterAPI():
 
         return None
 
+    def mute(self, channel: str, index: int, state: bool = None):
+        """
+        Mute an input/output.
+
+        :param str channel: Either "input" or "output".
+        :param int index: Strip/Bus number. (Index starts at 1)
+        :param bool state: Set `True` to mute. (Optional)
+
+        :returns void:
+        """
+
+        if channel == "input":
+            self._mute_input(index - 1, state)
+
+        elif channel == "output":
+            self._mute_output(index - 1, state)
+
+        else:
+            raise ValueError("Invalid channel value.")
+
+    def solo(self, channel: int, state: bool = None):
+        """
+        Sets the "solo" state of a strip.
+
+        :param int channel: Strip number. (Index starts at 0)
+        :param bool state: Set `True` to activate solo mode. (Optional)
+
+        :returns void:
+        """
+
+        if state is None:
+            state = not self.remote.inputs[channel].solo  # Invert value of mute.
+
+        self.remote.inputs[channel].solo = state
+
+        return None
+
 
 class OBSWebSocketAPI():
     """
     Handles OBS Studio's OBS-Websocket plugin API calls.
     """
 
-    def __init__(self, obs_host: str = "127.0.0.1", obs_port: int = 4444, obs_pass: str = None):
+    def __init__(
+        self,
+        obs_host: str = "127.0.0.1",
+        obs_port: int = 4444,
+        obs_pass: str = None,
+        obs_path: str = r"C:\Program Files\obs-studio\bin\64bit\obs64.exe"
+    ):
         """
         The initialization method of OBSWebSocketAPI() class.
 
@@ -199,7 +225,18 @@ class OBSWebSocketAPI():
         self.obs_port = obs_port
         self.obs_pass = obs_pass
 
+        self.exepath = obs_path
+
         self.client = obswebsocket.obsws(self.obs_host, self.obs_port, self.obs_pass)
+
+    def start_obs(self):
+        """
+        Start OBS Studio.
+
+        :returns void:
+        """
+
+        os.startfile(self.path)
 
     def connect(self):
         """
@@ -215,10 +252,6 @@ class Main():
         """
         The initialization method of Main() class.
         """
-
-        voicemeeter_kind = 1 # ? Check `VoicemeeterAPI().kinds`
-
-        self.VoicemeeterAPI = VoicemeeterAPI(voicemeeter_kind)
 
         # Check if user is trying to use a custom config file.
         try:
@@ -236,12 +269,24 @@ class Main():
         self.obs_port = self.config.get("obs_port")
         self.obs_pass = self.config.get("obs_pass")
         self.api_server = (self.config.get("host"), self.config.get("port"))
+        self.voicemeeter_kind = self.config.get("voicemeeter_kind")
         self.client_address_whitelist = self.config.get("whitelist").split(',')
+
+        # Initialize Voicemeeter API.
+        self.VoicemeeterAPI = VoicemeeterAPI(self.voicemeeter_kind)
+
+        # Initialize OBS-Websocket API
+        self.OBSWebSocketAPI = OBSWebSocketAPI(
+            obs_host=self.obs_host,
+            obs_port=self.obs_port,
+            obs_pass=self.obs_pass
+        )
 
         self.responses = {
             0: "Ok.",
             1: "Blocked.",
-            2: "Unknown command."
+            2: "Unknown command.",
+            3: "Invalid parameter."
         }
 
         self._initialized = True
@@ -261,13 +306,141 @@ class Main():
 
         while i < len(data):
             if data[i].startswith("voicemeeter"):
-                return [0, "Will do something in Voicemeeter."]
+                try:
+                    command = data[i + 1]
+
+                except(IndexError):
+                    return [
+                        0,
+                        f"""
+{data[0]} voicemeeter <commands> <parameters>
+
+Commands:
+
+start                                                     Start Voicemeeter.
+restart                                                   Restarts voicemeeter audio engine.
+mute <input|output> <strip/bus index> <true|false>        Mute an input/output. (Index starts at 1)
+solo <strip index> <true|false>                           Sets the "solo" state of a strip.
+"""
+                    ]
+
+                else:
+                    if command == "start":
+                        self.VoicemeeterAPI.start_voicemeeter()  # Starts Voicemeeter application on system.
+                        return [0, self.responses[0]]
+
+                    elif command == "restart":
+                        self.VoicemeeterAPI.restart()
+                        return [0, self.responses[0]]
+
+                    elif command == "mute":
+                        # First, get the parameters.
+                        try:  # <input|output>
+                            if data[i + 2] == "input":
+                                channel = "input"
+
+                            elif data[i + 2] == "output":
+                                channel = "output"
+
+                            else:
+                                return [3, self.responses[3]]
+
+                        except IndexError:
+                            return [3, self.responses[3]]
+
+                        try:  # <strip/bus index>
+                            index = int(data[i + 3])
+
+                        except(TypeError, IndexError):
+                            return [3, self.responses[3]]
+
+                        try:  # <true|false>
+                            if data[i + 4] == "true":
+                                state = True
+
+                            elif data[i + 4] == "false":
+                                state = False
+
+                            else:
+                                return [3, self.responses[3]]
+
+                        except IndexError:
+                            return [3, self.responses[3]]
+
+                        # Send the command to the API.
+                        try:
+                            self.VoicemeeterAPI.mute(channel, index, state)
+
+                        # IndexError is raised when index (the variable)
+                        # is out of range. (i.e, In Voicemeeter Banana,
+                        # there are only 5 inputs.)
+                        except IndexError:
+                            return [3, self.responses[3]]
+
+                        else:
+                            return [0, self.responses[0]]
+
+                    elif command == "solo":
+                        try:  # <strip index>
+                            index = int(data[i + 2])
+
+                        except(TypeError, IndexError):
+                            return [3, self.responses[3]]
+
+                        try:  # <true|false>
+                            if data[i + 3] == "true":
+                                state = True
+
+                            elif data[i + 3] == "false":
+                                state = False
+
+                            else:
+                                return [3, self.responses[3]]
+
+                        except IndexError:
+                            return [3, self.responses[3]]
+
+                        try:
+                            # Send the command to API.
+                            self.VoicemeeterAPI.solo(index - 1, state)
+
+                        except IndexError:
+                            return [3, self.responses[3]]
+
+                        else:
+                            return [0, self.responses[0]]
+
+                    else:
+                        return [2, self.responses[2]]
 
             elif data[i].startswith("obs"):
-                return [0, "Will do something in OBS Studio."]
+                try:
+                    command = data[i + 1]
+
+                except(IndexError):
+                    return [
+                        0,
+                        f"""
+{data[0]} obs <commands> <parameters>
+
+Commands:
+
+start        Start OBS Studio.
+"""
+                    ]
+
+                else:
+                    if command == "start":
+                        self.OBSWebSocketAPI.start_obs()  # Starts OBS Studio
+                        return [0, self.responses[0]]
+
+                    else:
+                        return [2, self.responses[2]]
 
             else:
                 return [2, self.responses[2]]
+
+            i += 1  # Iterate
 
     def main(self):
         """
@@ -279,8 +452,6 @@ class Main():
         if not self._initialized: return 1
 
         print("[i] Starting...")
-
-        self.VoicemeeterAPI.start_voicemeeter()  # Starts Voicemeeter application on system.
 
         # Start listening on <self.server>:<self.port>
         print(f"Starting to listen on `{self.api_server[0]}:{self.api_server[1]}`.")
@@ -309,10 +480,17 @@ class Main():
                     # These are the commands available from the client,
                     # NOT for the server.
                     helpstring = f"""
-{sys.argv[0]}
+{sys.argv[0]} <switches|commands>
+
+Switches:
 
 --help        -h        Show this help menu.
 --shutdown              Shutdown the server.
+
+Commands:
+
+obs                     Send a command to OBS-Websocket API.
+voicemeeter             Send a command to Voicemeeter API.
 """
                     client.sendall(pickle.dumps([0, helpstring]))
 
