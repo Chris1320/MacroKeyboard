@@ -6,7 +6,7 @@ keyboard_id=
 
 # Where to write the ASCII code of the pressed key (LuaMacros to AutoHotkey communication)
 # Preferrably the absolute path.
-keyfile=C:\.key.txt
+keyfile=C:/.key.txt
 
 # Voicemeeter API details
 # 0 = Voicemeeter Basic
@@ -20,7 +20,9 @@ obs_port=4444
 # Password can be empty if no password is set in OBS Studio.
 obs_pass=
 # Preferrably the absolute path.
-obs_path=C:\Program Files\obs-studio\bin\64bit\obs64.exe
+# Sometimes there's a problem when using backslash (\) as the separator.
+# When that happens, use a forward slash (/) instead.
+obs_path=C:/Program Files/obs-studio/bin/64bit/obs64.exe
 
 # multi_api_*.py configuration
 # Change host to 0.0.0.0 if you want to control the server via LAN.

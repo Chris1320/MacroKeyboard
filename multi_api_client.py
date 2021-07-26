@@ -8,7 +8,6 @@ import os
 import sys
 import pickle
 import socket
-# import requests
 
 from ConfigHandler import config_handler
 

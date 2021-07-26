@@ -24,9 +24,8 @@ Bare:
 - LuaMacros
 - AutoHotkey
 - Python 3 (Optional, if you'll use the server/client API.)
-  - PyCryptodomex
-  - toml
-  - websocket
+  - PyCryptodomex (For Server/Client)
+  - obs-websocket-py (For Server)
 
 Additional:
 

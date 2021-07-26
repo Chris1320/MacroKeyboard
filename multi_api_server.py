@@ -9,11 +9,13 @@ client command and execute API commands.
 import os
 import pickle
 import sys
+import time
 import pickle
 import socket
+import hashlib
+import subprocess
 from pathlib import Path
 
-# import requests
 import voicemeeter
 import obswebsocket
 
@@ -257,11 +259,12 @@ class OBSWebSocketAPI():
         self.obs_port = obs_port
         self.obs_pass = obs_pass
 
-        self.wdpath = Path(obs_path).parent  # ! FIXME: Results in `WindowsPath('C:/Program Files/obs-studio\x08in4bit')` (DEV0001)
+        self.wdpath = Path(obs_path).parent
         self.exepath = obs_path
         self.cwd = os.getcwd()
 
         self.client = obswebsocket.obsws(self.obs_host, self.obs_port, self.obs_pass)
+        self.connected = False
 
     def start_obs(self):
         """
@@ -271,22 +274,51 @@ class OBSWebSocketAPI():
         """
 
         # Check if self.wdpath exists first.
-        if os.path.isdir(self.wdpath) and self.wdpath != '.':
-            # If it exists, change directory.
-            os.chdir(self.cwd)
-
-        os.startfile(self.exepath)  # Start the file.
-        os.chdir(self.cwd)  # Go back to previous working directory
+        # if os.path.isdir(self.wdpath) and self.wdpath != '.':
+        # Start the file.
 
         return None
 
     def connect(self):
         """
         Attempt to connect to OBS-Websocket.
+
+        :returns tuple: Error code and the reason.
         """
 
-        self.client.connect()
-        # self.client.call()
+        try:
+            self.client.connect()
+
+        except(obswebsocket.exceptions.ConnectionFailure) as e:
+            self.connected = False
+            return (1, e)
+
+        except Exception as e:
+            self.connected = False
+            return (2, e)
+
+        else:
+            self.connected = True
+            return (0, "OK.")
+
+    def call(self, command: dict):
+        """
+        Make a call to OBS-Websocket.
+
+        :param str dict: The command to send.
+
+        :returns dict: Response from the server.
+        """
+
+        if self.connected:
+            return self.client.send(command)
+
+        else:
+            return {
+                "message-id": command["message-id"],
+                "status": "error",
+                "error": "Not yet connected."
+            }
 
     def disconnect(self):
         """
@@ -294,6 +326,7 @@ class OBSWebSocketAPI():
         """
 
         self.client.disconnect()
+        self.connected = False
 
 
 class Main():
@@ -528,8 +561,16 @@ solo <strip index> <true|false>                                   Sets the "solo
 Commands:
 
 start                                 Start OBS Studio.
-command <command> <parameters>        Send <command> with <parameters> parameters.
-                                      ()
+connect                               Connect to OBS Studio.
+disconnect                            Disconnect to OBS Studio.
+command <command> <parameters>        * Send <command> with <parameters> parameters.
+
+Examples:
+
+<client> obs command StartRecording  # Starts recording.
+<client> obs command SetCurrentScene --scene-name=scene1  # Switch to "scene1" scene.
+
+* See `https://github.com/Palakis/obs-websocket/blob/4.x-current/docs/generated/protocol.md` for more information.
 """
                     ]
 
@@ -538,8 +579,36 @@ command <command> <parameters>        Send <command> with <parameters> parameter
                         self.OBSWebSocketAPI.start_obs()  # Starts OBS Studio
                         return [0, self.responses[0]]
 
+                    elif command == "connect":
+                        return self.OBSWebSocketAPI.connect()
+
+                    elif command == "disconnect":
+                        self.OBSWebSocketAPI.disconnect()
+                        return [0, self.responses[0]]
+
                     elif command == "command":
-                        return [0, "Doing something from command."]
+                        try:
+                            obs_request = {
+                                "request-type": data[i + 2],
+                                "message-id": hashlib.sha1(time.asctime().encode()).hexdigest().upper()
+                            }
+
+                        except(IndexError):
+                            return [4, self.responses[4]]
+
+                        _ = i + 2  # Iterator for the while loop below.
+                        while _ < len(data):
+                            if data[_] == obs_request["request-type"]:
+                                pass  # Do nothing
+
+                            elif data[_].startswith("--"):
+                                obs_request[data[_].partition("--")[2].partition('=')[0]] = data[_].partition('=')[2]
+
+                            _ += 1
+
+                        response = self.OBSWebSocketAPI.call(obs_request)
+
+                        return [0, response]
 
                     else:
                         return [2, self.responses[2]]
@@ -551,6 +620,17 @@ command <command> <parameters>        Send <command> with <parameters> parameter
 
         return [4, self.responses[4]]
 
+    def cleanup(self):
+        """
+        Do some housekeeping before shutting down.
+
+        :returns void:
+        """
+
+        self.OBSWebSocketAPI.disconnect()
+
+        return None
+
     def main(self):
         """
         The main method of Main() class. Starts the server.
@@ -561,6 +641,10 @@ command <command> <parameters>        Send <command> with <parameters> parameter
         if not self._initialized: return 1
 
         print("[i] Starting...")
+
+        obs_connect = self.OBSWebSocketAPI.connect()
+        if obs_connect[0] != 0:
+            print("[!] OBS-Websocket API:", obs_connect[1])
 
         # Start listening on <self.server>:<self.port>
         print(f"[Server] Starting to listen on `{self.api_server[0]}:{self.api_server[1]}`.")
@@ -584,6 +668,7 @@ command <command> <parameters>        Send <command> with <parameters> parameter
                     client.sendall(pickle.dumps([0, self.responses[0]]))
                     # print("    Error Code: 0")
                     print("    Data Sent:", [0, self.responses[0]])
+                    self.cleanup()
                     return 0
 
                 elif ("--help" in data) or "-h" in data:
