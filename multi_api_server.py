@@ -276,6 +276,7 @@ class OBSWebSocketAPI():
         # Check if self.wdpath exists first.
         # if os.path.isdir(self.wdpath) and self.wdpath != '.':
         # Start the file.
+        # ! Not yet implemented (DEV0001)
 
         return None
 
@@ -560,7 +561,7 @@ solo <strip index> <true|false>                                   Sets the "solo
 
 Commands:
 
-start                                 Start OBS Studio.
+start                                 Start OBS Studio. (Not yet implemented)
 connect                               Connect to OBS Studio.
 disconnect                            Disconnect to OBS Studio.
 command <command> <parameters>        * Send <command> with <parameters> parameters.
