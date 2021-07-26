@@ -5,18 +5,25 @@
 keyboard_id=
 
 # Where to write the ASCII code of the pressed key (LuaMacros to AutoHotkey communication)
+# Preferrably the absolute path.
 keyfile=C:\.key.txt
 
-# Voicemeeter API details (See `VoicemeeterAPI().kinds` for more info)
+# Voicemeeter API details
+# 0 = Voicemeeter Basic
+# 1 = Voicemeeter Banana
+# 2 = Voicemeeter Potato
 voicemeeter_kind=1
 
 # OBS Studio OBS-Websocket plugin details
 obs_host=127.0.0.1
 obs_port=4444
+# Password can be empty if no password is set in OBS Studio.
 obs_pass=
+# Preferrably the absolute path.
 obs_path=C:\Program Files\obs-studio\bin\64bit\obs64.exe
 
 # multi_api_*.py configuration
+# Change host to 0.0.0.0 if you want to control the server via LAN.
 host=127.0.0.1
 port=8642
 
