@@ -2,6 +2,8 @@
 
 My setup for using a second keyboard as a macropad.
 
+**NOTE**: This version is not (yet) working properly. `Main.ahk` cannot read `%keyfile%`.
+
 ## How to Use
 
 1. Plug your second keyboard (your macropad) to your system.
