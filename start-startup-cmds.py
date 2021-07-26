@@ -202,6 +202,7 @@ class Main():
 		# self.configpath = f"D:/Scripts/{self.name}.conf"  # This is hardcoded; This is where the configuration file is located.
 
 		self.cmds = [
+			# ? Just remove these classes... These are my applications to start on startup.
 			Service(
 				name = "NetLimiter 4",
 				serv_name = "NLSvc",

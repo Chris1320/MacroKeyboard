@@ -26,6 +26,14 @@ class VoicemeeterAPI():
           applications other than Voicemeeter Banana.
     """
 
+    # * TODO: Support commands like from Macro.Buttons (DEV0004)
+    #
+    # Sample Command: Duck S4
+    #
+    # Strip(3).fadeto = (-20.0, 250);
+    # Strip(3).EQGain2 = -12.0;
+    #
+
     def __init__(self, kind_id: int):
         """
         The initialization method of Main() class.

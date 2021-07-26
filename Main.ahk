@@ -83,7 +83,7 @@ F24::
 
     ;Read the file key.txt and outputs the result in a variable named Output
     FileRead, Output, %keyfile%
-    MsgBox,, "F24 Detected", "Detected input: %Output%"
+    ;MsgBox,, "F24 Detected", "Detected input: %Output%"
 
 ;BTW these key codes are unicode
 ;https://en.wikipedia.org/wiki/List_of_Unicode_characters

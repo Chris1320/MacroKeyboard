@@ -3,3 +3,4 @@ __pycache__/
 key.txt
 env/
 .vscode/
+.prettierrc
