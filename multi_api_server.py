@@ -11,6 +11,8 @@ import pickle
 import sys
 import pickle
 import socket
+from pathlib import Path
+
 # import requests
 import voicemeeter
 import obswebsocket
@@ -255,7 +257,9 @@ class OBSWebSocketAPI():
         self.obs_port = obs_port
         self.obs_pass = obs_pass
 
+        self.wdpath = Path(obs_path).parent  # ! FIXME: Results in `WindowsPath('C:/Program Files/obs-studio\x08in4bit')` (DEV0001)
         self.exepath = obs_path
+        self.cwd = os.getcwd()
 
         self.client = obswebsocket.obsws(self.obs_host, self.obs_port, self.obs_pass)
 
@@ -266,14 +270,30 @@ class OBSWebSocketAPI():
         :returns void:
         """
 
-        os.startfile(self.path)
+        # Check if self.wdpath exists first.
+        if os.path.isdir(self.wdpath) and self.wdpath != '.':
+            # If it exists, change directory.
+            os.chdir(self.cwd)
+
+        os.startfile(self.exepath)  # Start the file.
+        os.chdir(self.cwd)  # Go back to previous working directory
+
+        return None
 
     def connect(self):
         """
-        Attempt to connect to OBS Studio.
+        Attempt to connect to OBS-Websocket.
         """
 
         self.client.connect()
+        # self.client.call()
+
+    def disconnect(self):
+        """
+        Disconnect from OBS-Websocket.
+        """
+
+        self.client.disconnect()
 
 
 class Main():
@@ -316,7 +336,8 @@ class Main():
             0: "OK.",
             1: "Blocked.",
             2: "Unknown command.",
-            3: "Invalid parameter."
+            3: "Invalid parameter.",
+            4: "Insufficient arguments."
         }
 
         self._initialized = True
@@ -506,7 +527,9 @@ solo <strip index> <true|false>                                   Sets the "solo
 
 Commands:
 
-start        Start OBS Studio.
+start                                 Start OBS Studio.
+command <command> <parameters>        Send <command> with <parameters> parameters.
+                                      ()
 """
                     ]
 
@@ -515,6 +538,9 @@ start        Start OBS Studio.
                         self.OBSWebSocketAPI.start_obs()  # Starts OBS Studio
                         return [0, self.responses[0]]
 
+                    elif command == "command":
+                        return [0, "Doing something from command."]
+
                     else:
                         return [2, self.responses[2]]
 
@@ -522,6 +548,8 @@ start        Start OBS Studio.
                 return [2, self.responses[2]]
 
             i += 1  # Iterate
+
+        return [4, self.responses[4]]
 
     def main(self):
         """
@@ -535,7 +563,7 @@ start        Start OBS Studio.
         print("[i] Starting...")
 
         # Start listening on <self.server>:<self.port>
-        print(f"Starting to listen on `{self.api_server[0]}:{self.api_server[1]}`.")
+        print(f"[Server] Starting to listen on `{self.api_server[0]}:{self.api_server[1]}`.")
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
             # server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             server.bind(self.api_server)
@@ -544,16 +572,18 @@ start        Start OBS Studio.
                 client, address = server.accept()
                 # Check the whitelist first.
                 if address[0] not in self.client_address_whitelist:
-                    print(f"[!] Connection blocked from `{address[0]}:{address[1]}`.")
+                    print(f"[Server] Connection blocked from `{address[0]}:{address[1]}`.")
                     client.sendall(pickle.dumps([1, self.responses[1]]))
                     continue
 
-                print(f"Accepted connection from `{address[0]}:{address[1]}`.")
+                print(f"[Server] Accepted connection from `{address[0]}:{address[1]}`.")
                 data = pickle.loads(client.recv(4096))
-                print("Data:",data)  # DEV0005
+                print("    Data Recieved:",data)  # DEV0005
                 if "--shutdown" in data:
                     print("[i] Shutdown recieved. Now quitting.")
                     client.sendall(pickle.dumps([0, self.responses[0]]))
+                    # print("    Error Code: 0")
+                    print("    Data Sent:", [0, self.responses[0]])
                     return 0
 
                 elif ("--help" in data) or "-h" in data:
@@ -574,11 +604,16 @@ obs                     Send a command to OBS-Websocket API.
 voicemeeter             Send a command to Voicemeeter API.
 """
                     client.sendall(pickle.dumps([0, helpstring]))
+                    # print("    Error Code: 0")
+                    print("    Data Sent:", [0, helpstring])
 
                 else:
-                    client.sendall(pickle.dumps(self.parse_data(data)))
+                    result = self.parse_data(data)
+                    client.sendall(pickle.dumps(result))
+                    # print("    Error Code:", result[0])
+                    print("    Data Sent:", result)
 
-                print("Communication done.\n")
+                print("[Server] Communication done.\n")
                 continue
 
 
