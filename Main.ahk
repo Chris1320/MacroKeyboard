@@ -224,55 +224,46 @@ F24::
     else if (mode == 1) {
         if (Output == Numpad["/"]) {
             Send, {Media_Prev}
-            Sleep 10
             Return
         }
 
         else if (Output == Numpad["*"]) {
             Send, {Media_Next}
-            Sleep 10
             Return
         }
 
         else if (Output == Numpad["-"]) {
             Send, {Volume_Down}
-            Sleep 10
             Return
         }
 
         else if (Output == Numpad["+"]) {
             Send, {Volume_Up}
-            Sleep 10
             Return
         }
 
         else if (Output == Numpad["backspace"]) {
             Send, ^{Numpad9}
-            Sleep 10
             Return
         }
 
         else if (Output == Numpad["enter"]) {
             Send, !{Numpad9}
-            Sleep 10
             Return
         }
 
         else if (Output == Numpad["."]) {
             Send, {Media_Play_Pause}
-            Sleep 10
             Return
         }
 
         else if (Output == Numpad["0"]) {
             Send, !{Numpad7}
-            Sleep 10
             Return
         }
 
         else if (Output == Numpad["1"]) {
             Send, ^{F19}
-            Sleep 10
             Return
         }
 
@@ -284,19 +275,16 @@ F24::
 
         else if (Output == Numpad["3"]) {
             Send, ^{F20}
-            Sleep 10
             Return
         }
 
         else if (Output == Numpad["4"]) {
             Send, ^{F21}
-            Sleep 10
             Return
         }
 
         else if (Output == Numpad["5"]) {
             Send, ^{F22}
-            Sleep 10
             Return
         }
 
@@ -308,19 +296,16 @@ F24::
 
         else if (Output == Numpad["7"]) {
             Send, ^{F1}
-            Sleep 10
             Return
         }
 
         else if (Output == Numpad["8"]) {
             Send, ^{F2}
-            Sleep 10
             Return
         }
 
         else if (Output == Numpad["9"]) {
             Send, ^{F3}
-            Sleep 10
             Return
         }
 
@@ -329,15 +314,13 @@ F24::
 
     else if (mode == 2) {
         if (WinExist("ahk_exe obs64.exe")) {
-            if (WinActive("ahk_exe obs64.exe")) {  ; For debugging purposes only
-                MsgBox, , OBS Studio, Active
-            } else {
-                MsgBox, , OBS Studio, Inactive
-            }
+            ;if (WinActive("ahk_exe obs64.exe")) {  ; For debugging purposes only
+            ;    MsgBox, , OBS Studio, Active, 3
+            ;} else {
+            ;    MsgBox, , OBS Studio, Inactive, 3
+            ;}
 
             if (Output == Numpad["/"]) {
-                ;Send, ^{F10}
-                ;Sleep 10
                 Return
             }
 
@@ -349,19 +332,16 @@ F24::
                 else {
                     ControlSend, , ^{F13}, ahk_exe obs64.exe
                 }
-                Sleep 10
                 Return
             }
 
             else if (Output == Numpad["-"]) {
                 Send, {Volume_Down}
-                Sleep 10
                 Return
             }
 
             else if (Output == Numpad["+"]) {
                 Send, {Volume_Up}
-                Sleep 10
                 Return
             }
 
@@ -373,98 +353,132 @@ F24::
                 else {
                     ControlSend, , ^{F14}, ahk_exe obs64.exe
                 }
-                Sleep 10
                 Return
             }
 
             else if (Output == Numpad["enter"]) {
                 if (WinActive("ahk_exe obs64.exe")) {
                     Send, ^{F15}
-                } else {
+                }
+
+                else {
                     ControlSend, , ^{F15}, ahk_exe obs64.exe
                 }
                 Return
             }
 
             else if (Output == Numpad["."]) {
-                Send, ^{F16}
-                ; ControlSend, , ^{F16}, ahk_exe obs64.exe
-                Sleep 10
+                if (WinActive("ahk_exe obs64.exe")) {
+                    Send, ^{F16}
+                }
+
+                else {
+                    ControlSend, , ^{F16}, ahk_exe obs64.exe
+                }
                 Return
             }
 
             else if (Output == Numpad["0"]) {
                 Send, !{Numpad7}
-                Sleep 10
                 Return
             }
 
             else if (Output == Numpad["1"]) {
-                Send, !{F13}
-                ; ControlSend, , !{F13}, ahk_exe obs64.exe
-                Sleep 10
+                if (WinActive("ahk_exe obs64.exe")) {
+                    Send, !{F13}
+                }
+
+                else {
+                    ControlSend, , !{F13}, ahk_exe obs64.exe
+                }
                 Return
             }
 
             else if (Output == Numpad["2"]) {
-                Send, !{F14}
-                ; ControlSend, , !{F14}, ahk_exe obs64.exe
-                Sleep 10
+                if (WinActive("ahk_exe obs64.exe")) {
+                    Send, !{F14}
+                }
+
+                else {
+                    ControlSend, , !{F14}, ahk_exe obs64.exe
+                }
                 Return
             }
 
             else if (Output == Numpad["3"]) {
-                Send, !{F15}
-                ; ControlSend, , !{F15}, ahk_exe obs64.exe
-                Sleep 10
+                if (WinActive("ahk_exe obs64.exe")) {
+                    Send, !{F15}
+                }
+
+                else {
+                    ControlSend, , !{F15}, ahk_exe obs64.exe
+                }
                 Return
             }
 
             else if (Output == Numpad["4"]) {
-                Send, !{F16}
-                ; ControlSend, , !{F16}, ahk_exe obs64.exe
-                Sleep 10
+                if (WinActive("ahk_exe obs64.exe")) {
+                    Send, !{F16}
+                }
+
+                else {
+                    ControlSend, , !{F16}, ahk_exe obs64.exe
+                }
                 Return
             }
 
             else if (Output == Numpad["5"]) {
-                Send, !{F17}
-                ; ControlSend, , !{F17}, ahk_exe obs64.exe
-                Sleep 10
+                if (WinActive("ahk_exe obs64.exe")) {
+                    Send, !{F17}
+                }
+
+                else {
+                    ControlSend, , !{F17}, ahk_exe obs64.exe
+                }
                 Return
             }
 
             else if (Output == Numpad["6"]) {
-                Send, !{F18}
-                ; ControlSend, , !{F18}, ahk_exe obs64.exe
-                Sleep 10
+                if (WinActive("ahk_exe obs64.exe")) {
+                    Send, !{F18}
+                }
+
+                else {
+                    ControlSend, , !{F18}, ahk_exe obs64.exe
+                }
                 Return
             }
 
             else if (Output == Numpad["7"]) {
-                Send, !{F19}
-                ; ControlSend, , !{F19}, ahk_exe obs64.exe
-                Sleep 10
+                if (WinActive("ahk_exe obs64.exe")) {
+                    Send, !{F19}
+                }
+
+                else {
+                    ControlSend, , !{F19}, ahk_exe obs64.exe
+                }
                 Return
             }
 
             else if (Output == Numpad["8"]) {
-                Send, !{F20}
-                ; ControlSend, , !{F20}, ahk_exe obs64.exe
-                Sleep 10
+                if (WinActive("ahk_exe obs64.exe")) {
+                    Send, !{F20}
+                }
+
+                else {
+                    ControlSend, , !{F20}, ahk_exe obs64.exe
+                }
                 Return
             }
 
             else if (Output == Numpad["9"]) {
-                ; Send, ^{F21}
-                ; Sleep 10
                 Return
             }
         }
 
         else
         {
-            MsgBox, , Macropad Error, OBS Studio is not started. Please start it first., 10
+            MsgBox, , Macropad Warning, OBS Studio is not started. Please start it first., 3
             Return
         }
 
