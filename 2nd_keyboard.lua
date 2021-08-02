@@ -6,7 +6,7 @@ lmc.minimizeToTray = true
 lmc_minimize()
 
 -- Change the path here if you want to use a different configuration file.
-local configfile = "./config.txt";
+local configfile = "D:/Scripts/MacroKeyboard/config.txt";
 
 print("Reading configuration file `" .. configfile .. "`...")
 

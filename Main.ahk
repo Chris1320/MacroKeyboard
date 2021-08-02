@@ -1,16 +1,33 @@
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
-#Warn  ; Enable warnings to assist with detecting common errors.
-SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
+; #Warn  ; Enable warnings to assist with detecting common errors.
+#InstallKeybdHook ;Makes the script monitor keystrokes for hotkeys not supported by default windows registry, improves responsiveness
+#UseHook On ;Forces script to use keyboard hook for all hotkeys
+#SingleInstance force ;Makes sure you don't accidentally have multiple versions of this script running at one time
+#KeyHistory 200 ;how many events the key history will record, useful for debugging
+#MenuMaskKey vk07 ;Menu masking may unintentionally send additional keystrokes when using Alt as a modifier, this prevents that
+#WinActivateForce ;prevent taskbar flashing.
+#Persistent
+
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+SendMode Input ;Sets the default method any commands will be sent. Overwritten by ControlSend commands but good to have to prevent issues when tinkering in the future
 SetTitleMatchMode, RegEx
+SetKeyDelay, -1, 50
+; DetectHiddenWindows, On  ; This makes ControlSend not work in OBS Studio mode.
+
+if not A_IsAdmin
+{
+   Run *RunAs "%A_ScriptFullPath%"  ; Requires v1.0.92.01+
+   ExitApp
+}
 
 configfile := "./config.txt"  ; The path of the configuration file
                               ; (Change this if you want to use a
                               ;       different configuration file)
 
 ; FIXME: How do I put a dictionary into config.txt? (DEV0004)
+
 mode := 1 ; The default mode
-max_modes := 4 ; How many "modes" do we have?
+max_modes := 2 ; How many "modes" do we have?
 mode_names := {(1): "Application Shortcuts", (2): "OBS Studio", (3): "N/A", (4): "N/A"}
 
 ; Read configfile contents
@@ -87,10 +104,10 @@ Numpad := {"numlock": "144", "/": "111", "*": "106", "-": "109"
             , "0": "96", "del": "46", "enter": "13", ".": "110", "backspace": "8"}
 
 ;F24 hotkey
-f24::
+F24::
 
     ;Read the file key.txt and outputs the result in a variable named Output
-    FileRead, Output, %keyfile%
+    FileRead, Output, D:/Scripts/MacroKeyboard/key.txt
 
     ; Here are the current assignments for the hotkeys. Change them to your likings.
     ; Refer to AutoHotkey documentation for more information.
@@ -100,48 +117,47 @@ f24::
     ;
     ; ########## [Mode 1: Application Shortcuts] ##########
     ;
-    ; {Num/}             Play/Pause (Media Key)
-    ; {Num*}             Mute (Media Key)
+    ; {Num/}             Previous (Media Key)
+    ; {Num*}             Next (Media Key)
     ; {Num-}             Volume Down (Media Key)
     ; {Num+}             Volume Up (Media Key)
     ;
-    ; {NumBackspace}     N/A
-    ; {NumEnter}         Open "This PC" (Explorer)
-    ; {Num.}             N/A
-    ; {Num0}             Launch Firefox
+    ; {NumBackspace}     Reload Voicemeeter Settings
+    ; {NumEnter}         Duck S4 (Voicemeeter)
+    ; {Num.}             Play/Pause (Media Key)
+    ; {Num0}             Toggle Microphone (Toggle Voicemeeter)
     ;
-    ; {Num1}             N/A
-    ; {Num2}             N/A
-    ; {Num3}             N/A
-    ; {Num4}             N/A
-    ; {Num5}             N/A
-    ; {Num6}             N/A
+    ; {Num1}             Firefox
+    ; {Num2}             Open "This PC" (Explorer)
+    ; {Num3}             Obsidian
+    ; {Num4}             MusicBee
+    ; {Num5}             OBS Studio
+    ; {Num6}             Turn off Monitor
     ;
-    ; {Num7}             N/A
-    ; {Num8}             N/A
-    ; {Num9}             N/A
+    ; {Num7}             Mute A1 (Voicemeeter)
+    ; {Num8}             Mute A2 (Voicemeeter)
+    ; {Num9}             Mute A3 (Voicemeeter)
     ;
     ; ########## [Mode 2: OBS Mode] ##########
     ;
     ; {Num/}             N/A
-    ; {Num*}             N/A
-    ; {Num-}             N/A
-    ; {Num+}             N/A
+    ; {Num*}             Toggle AFK Mode (OBS Studio)
+    ; {Num-}             Volume Down (Media Key)
+    ; {Num+}             Volume Up (Media Key)
     ;
-    ; {NumBackspace}     N/A
-    ; {NumEnter}         N/A
-    ; {Num.}             N/A
+    ; {NumBackspace}     Pause/Resume Recording (OBS Studio)
+    ; {NumEnter}         Start/Stop Recording (OBS Studio)
+    ; {Num.}             Start/Stop Virtual Camera (OBS Studio)
+    ; {Num0}             Toggle Microphone (Voicemeeter)
     ;
-    ; {Num0}             N/A
-    ;
-    ; {Num1}             N/A
-    ; {Num2}             N/A
-    ; {Num3}             N/A
-    ; {Num4}             N/A
-    ; {Num5}             N/A
-    ; {Num6}             N/A
-    ; {Num7}             N/A
-    ; {Num8}             N/A
+    ; {Num1}             Go to Scene 1 (OBS Studio)
+    ; {Num2}             Go to Scene 2 (OBS Studio)
+    ; {Num3}             Go to Scene 3 (OBS Studio)
+    ; {Num4}             Go to Scene 4 (OBS Studio)
+    ; {Num5}             Go to Scene 5 (OBS Studio)
+    ; {Num6}             Go to Scene 6 (OBS Studio)
+    ; {Num7}             Go to Scene 7 (OBS Studio)
+    ; {Num8}             Go to Scene 8 (OBS Studio)
     ; {Num9}             N/A
     ;
     ; ########## [Mode 3: N/A] ##########
@@ -207,83 +223,104 @@ f24::
 
     else if (mode == 1) {
         if (Output == Numpad["/"]) {
-            Send, {Media_Play_Pause}
+            Send, {Media_Prev}
+            Sleep 10
             Return
         }
 
         else if (Output == Numpad["*"]) {
-            Send, {Volume_Mute}
+            Send, {Media_Next}
+            Sleep 10
             Return
         }
 
         else if (Output == Numpad["-"]) {
             Send, {Volume_Down}
+            Sleep 10
             Return
         }
 
         else if (Output == Numpad["+"]) {
             Send, {Volume_Up}
+            Sleep 10
             Return
         }
 
         else if (Output == Numpad["backspace"]) {
-            ; Command here
+            Send, ^{Numpad9}
+            Sleep 10
             Return
         }
 
         else if (Output == Numpad["enter"]) {
-            Run, ::{20d04fe0-3aea-1069-a2d8-08002b30309d}
+            Send, !{Numpad9}
+            Sleep 10
             Return
         }
 
         else if (Output == Numpad["."]) {
-            ; Command here
+            Send, {Media_Play_Pause}
+            Sleep 10
             Return
         }
 
         else if (Output == Numpad["0"]) {
-            Run, firefox.exe
+            Send, !{Numpad7}
+            Sleep 10
             Return
         }
 
         else if (Output == Numpad["1"]) {
-            ; Command here
+            Send, ^{F19}
+            Sleep 10
             Return
         }
 
         else if (Output == Numpad["2"]) {
-            ; Command here
+            ; Opens "This PC" folder (From `https://www.autohotkey.com/docs/commands/Run.htm`)
+            Run, ::{20d04fe0-3aea-1069-a2d8-08002b30309d}
             Return
         }
 
         else if (Output == Numpad["3"]) {
-            ; Command here
+            Send, ^{F20}
+            Sleep 10
             Return
         }
 
         else if (Output == Numpad["4"]) {
-            ; Command here
+            Send, ^{F21}
+            Sleep 10
             Return
         }
 
         else if (Output == Numpad["5"]) {
-            ; Command here
+            Send, ^{F22}
+            Sleep 10
             Return
         }
+
         else if (Output == Numpad["6"]) {
-            ; Command here
+            Sleep 100 ; if you use this with a hotkey, not sleeping will make it so your keyboard input wakes up the monitor immediately
+            SendMessage 0x112, 0xF170, 2,,Program Manager ; send the monitor into standby (off) mode
             Return
         }
+
         else if (Output == Numpad["7"]) {
-            ; Command here
+            Send, ^{F1}
+            Sleep 10
             Return
         }
+
         else if (Output == Numpad["8"]) {
-            ; Command here
+            Send, ^{F2}
+            Sleep 10
             Return
         }
+
         else if (Output == Numpad["9"]) {
-            ; Command here
+            Send, ^{F3}
+            Sleep 10
             Return
         }
 
@@ -291,84 +328,143 @@ f24::
     }
 
     else if (mode == 2) {
-        if (Output == Numpad["/"]) {
-            ; Command here
-            Return
+        if (WinExist("ahk_exe obs64.exe")) {
+            if (WinActive("ahk_exe obs64.exe")) {  ; For debugging purposes only
+                MsgBox, , OBS Studio, Active
+            } else {
+                MsgBox, , OBS Studio, Inactive
+            }
+
+            if (Output == Numpad["/"]) {
+                ;Send, ^{F10}
+                ;Sleep 10
+                Return
+            }
+
+            else if (Output == Numpad["*"]) {
+                if (WinActive("ahk_exe obs64.exe")) {
+                    Send, ^{F13}
+                }
+
+                else {
+                    ControlSend, , ^{F13}, ahk_exe obs64.exe
+                }
+                Sleep 10
+                Return
+            }
+
+            else if (Output == Numpad["-"]) {
+                Send, {Volume_Down}
+                Sleep 10
+                Return
+            }
+
+            else if (Output == Numpad["+"]) {
+                Send, {Volume_Up}
+                Sleep 10
+                Return
+            }
+
+            else if (Output == Numpad["backspace"]) {
+                if (WinActive("ahk_exe obs64.exe")) {
+                    Send, ^{F14}
+                }
+
+                else {
+                    ControlSend, , ^{F14}, ahk_exe obs64.exe
+                }
+                Sleep 10
+                Return
+            }
+
+            else if (Output == Numpad["enter"]) {
+                if (WinActive("ahk_exe obs64.exe")) {
+                    Send, ^{F15}
+                } else {
+                    ControlSend, , ^{F15}, ahk_exe obs64.exe
+                }
+                Return
+            }
+
+            else if (Output == Numpad["."]) {
+                Send, ^{F16}
+                ; ControlSend, , ^{F16}, ahk_exe obs64.exe
+                Sleep 10
+                Return
+            }
+
+            else if (Output == Numpad["0"]) {
+                Send, !{Numpad7}
+                Sleep 10
+                Return
+            }
+
+            else if (Output == Numpad["1"]) {
+                Send, !{F13}
+                ; ControlSend, , !{F13}, ahk_exe obs64.exe
+                Sleep 10
+                Return
+            }
+
+            else if (Output == Numpad["2"]) {
+                Send, !{F14}
+                ; ControlSend, , !{F14}, ahk_exe obs64.exe
+                Sleep 10
+                Return
+            }
+
+            else if (Output == Numpad["3"]) {
+                Send, !{F15}
+                ; ControlSend, , !{F15}, ahk_exe obs64.exe
+                Sleep 10
+                Return
+            }
+
+            else if (Output == Numpad["4"]) {
+                Send, !{F16}
+                ; ControlSend, , !{F16}, ahk_exe obs64.exe
+                Sleep 10
+                Return
+            }
+
+            else if (Output == Numpad["5"]) {
+                Send, !{F17}
+                ; ControlSend, , !{F17}, ahk_exe obs64.exe
+                Sleep 10
+                Return
+            }
+
+            else if (Output == Numpad["6"]) {
+                Send, !{F18}
+                ; ControlSend, , !{F18}, ahk_exe obs64.exe
+                Sleep 10
+                Return
+            }
+
+            else if (Output == Numpad["7"]) {
+                Send, !{F19}
+                ; ControlSend, , !{F19}, ahk_exe obs64.exe
+                Sleep 10
+                Return
+            }
+
+            else if (Output == Numpad["8"]) {
+                Send, !{F20}
+                ; ControlSend, , !{F20}, ahk_exe obs64.exe
+                Sleep 10
+                Return
+            }
+
+            else if (Output == Numpad["9"]) {
+                ; Send, ^{F21}
+                ; Sleep 10
+                Return
+            }
         }
 
-        else if (Output == Numpad["*"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["-"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["+"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["backspace"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["enter"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["."]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["0"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["1"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["2"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["3"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["4"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["5"]) {
-            ; Command here
-            Return
-        }
-        else if (Output == Numpad["6"]) {
-            ; Command here
-            Return
-        }
-        else if (Output == Numpad["7"]) {
-            ; Command here
-            Return
-        }
-        else if (Output == Numpad["8"]) {
-            ; Command here
-            Return
-        }
-        else if (Output == Numpad["9"]) {
-            ; Command here
+        else
+        {
+            MsgBox, , Macropad Error, OBS Studio is not started. Please start it first., 10
             Return
         }
 
@@ -376,171 +472,15 @@ f24::
     }
 
     else if (mode == 3) {
-        if (Output == Numpad["/"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["*"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["-"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["+"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["backspace"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["enter"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["."]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["0"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["1"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["2"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["3"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["4"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["5"]) {
-            ; Command here
-            Return
-        }
-        else if (Output == Numpad["6"]) {
-            ; Command here
-            Return
-        }
-        else if (Output == Numpad["7"]) {
-            ; Command here
-            Return
-        }
-        else if (Output == Numpad["8"]) {
-            ; Command here
-            Return
-        }
-        else if (Output == Numpad["9"]) {
-            ; Command here
-            Return
-        }
+        if (Output == Numpad["enter"])
+            MsgBox, , "Macropad", "This mode is not configured yet.", 3
 
         Return
     }
 
     else if (mode == 4) {
-        if (Output == Numpad["/"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["*"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["-"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["+"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["backspace"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["enter"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["."]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["0"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["1"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["2"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["3"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["4"]) {
-            ; Command here
-            Return
-        }
-
-        else if (Output == Numpad["5"]) {
-            ; Command here
-            Return
-        }
-        else if (Output == Numpad["6"]) {
-            ; Command here
-            Return
-        }
-        else if (Output == Numpad["7"]) {
-            ; Command here
-            Return
-        }
-        else if (Output == Numpad["8"]) {
-            ; Command here
-            Return
-        }
-        else if (Output == Numpad["9"]) {
-            ; Command here
-            Return
-        }
+        if (Output == Numpad["enter"])
+            MsgBox, , "Macropad", "This mode is not configured yet.", 3
 
         Return
     }
