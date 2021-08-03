@@ -2,7 +2,10 @@
 
 My setup for using a second keyboard as a macropad.
 
-**NOTE**: This version is not (yet) working properly. `Main.ahk` cannot read `%keyfile%`.
+**NOTEs**:
+
+- ~~This version is not (yet) working properly. `Main.ahk` cannot read `%keyfile%`.~~
+- This version is experimental. `config.txt` is currently unused; Variables are hardcoded.
 
 ## How to Use
 
@@ -25,9 +28,6 @@ Bare:
 
 - LuaMacros
 - AutoHotkey
-- Python 3 (Optional, if you'll use the server/client API.)
-  - PyCryptodomex (For Server/Client)
-  - obs-websocket-py (For Server)
 
 Additional:
 
