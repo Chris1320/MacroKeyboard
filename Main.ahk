@@ -28,7 +28,7 @@ configfile := "./config.txt"  ; The path of the configuration file
 
 mode := 1 ; The default mode
 max_modes := 2 ; How many "modes" do we have?
-mode_names := {(1): "Application Shortcuts", (2): "OBS Studio", (3): "N/A", (4): "N/A"}
+mode_names := {(1): "Application Shortcuts", (2): "OBS Studio", (3): "Context-Aware Mode"}
 
 ; Read configfile contents
 FileRead, config, %configfile%
@@ -78,12 +78,10 @@ if (keyfile == "")
 
 ; MsgBox,, "Configfile Values", Keyfile:%keyfile%  ; For debugging only (DEV0005)
 
-;BTW these key codes are unicode
-;https://en.wikipedia.org/wiki/List_of_Unicode_characters
-;You can add more key codes if you want
-;If you dont know the key code you can use Get_key_code.lua
-;Here we attach a key code to each key.
-;this is like saying. when i ask for 0 give me back 48 etc. each key is seperated by commas.
+; These key codes are unicode
+; https://en.wikipedia.org/wiki/List_of_Unicode_characters
+; You can add more key codes if you want
+; If you dont know the key code you can use Get_key_code.lua
 
         ;List of main keys
         ;Number keys
@@ -128,7 +126,7 @@ F24::
     ; {Num0}             Toggle Microphone (Toggle Voicemeeter)
     ;
     ; {Num1}             Firefox
-    ; {Num2}             Open "This PC" (Explorer)
+    ; {Num2}             Windows Terminal
     ; {Num3}             Obsidian
     ; {Num4}             MusicBee
     ; {Num5}             OBS Studio
@@ -140,7 +138,7 @@ F24::
     ;
     ; ########## [Mode 2: OBS Mode] ##########
     ;
-    ; {Num/}             N/A
+    ; {Num/}             Toggle Freeze Filter (OBS Studio)
     ; {Num*}             Toggle AFK Mode (OBS Studio)
     ; {Num-}             Volume Down (Media Key)
     ; {Num+}             Volume Up (Media Key)
@@ -207,9 +205,11 @@ F24::
 
     if (Output == Numpad["numlock"]) {
         if (mode == max_modes)
+            ; If <mode> is equal to <max_modes>, reset it to 1.
             mode := 1
 
         else {
+            ; Increment <mode>.
             mode++
         }
 
@@ -263,13 +263,50 @@ F24::
         }
 
         else if (Output == Numpad["1"]) {
-            Send, ^{F19}
+            ; Check if Firefox is running already.
+            if (WinExist("ahk_class MozillaWindowClass")) {
+                ; If the window is already active, minimize it.
+                if (WinActive("ahk_class MozillaWindowClass"))
+                {
+                    Send, {AltDown}{Escape}{AltUp} ; Minimize Window
+                }
+                else
+                {
+                    ; Show window if it's already running.
+                    WinShow, ahk_class MozillaWindowClass
+                    WinActivate, ahk_class MozillaWindowClass
+                }
+            }
+            else
+            {
+                ; Send keystroke to run the shortcut file of Firefox.
+                Send, ^{F19}
+            }
+
             Return
         }
 
         else if (Output == Numpad["2"]) {
-            ; Opens "This PC" folder (From `https://www.autohotkey.com/docs/commands/Run.htm`)
-            Run, ::{20d04fe0-3aea-1069-a2d8-08002b30309d}
+            ; Check if "Windows Terminal" window exists.
+            if (WinExist("ahk_class CASCADIA_HOSTING_WINDOW_CLASS"))
+            {
+                if (WinActive("ahk_class CASCADIA_HOSTING_WINDOW_CLASS"))
+                {
+                    Send, {AltDown}{Escape}{AltUp} ; Minimize Window
+                }
+                else
+                {
+                    ; Show the window if Windows Terminal is running already.
+                    WinShow, ahk_class CASCADIA_HOSTING_WINDOW_CLASS
+                    WinActivate, ahk_class CASCADIA_HOSTING_WINDOW_CLASS
+                }
+            }
+            else
+            {
+                ; Run Windows Terminal if it's not running already.
+                Run, "C:\Users\Chris3120\AppData\Local\Microsoft\WindowsApps\wt.exe"
+            }
+
             Return
         }
 
@@ -284,7 +321,25 @@ F24::
         }
 
         else if (Output == Numpad["5"]) {
-            Send, ^{F22}
+            ; `ahk_class Qt5152QWindowIcon` is OBS Studio's window class, according to AHK's Windows Spy.
+            ; For some reason, `ahk_exe obs64.exe` doesn't work here.
+            if (WinExist("ahk_class Qt5152QWindowIcon"))
+            {
+                if (WinActive("ahk_class Qt5152QWindowIcon"))
+                {
+                    Send, {AltDown}{Escape}{AltUp}
+                }
+                else
+                {
+                    WinShow, ahk_class Qt5152QWindowIcon
+                    WinActivate, ahk_class Qt5152QWindowIcon
+                }
+            }
+            else
+            {
+                Send, ^{F22}
+            }
+
             Return
         }
 
@@ -321,6 +376,13 @@ F24::
             ;}
 
             if (Output == Numpad["/"]) {
+                if (WinActive("ahk_exe obs64.exe")) {
+                    Send, ^{F17}
+                }
+
+                else {
+                    ControlSend, , ^{F17}, ahk_exe obs64.exe
+                }
                 Return
             }
 

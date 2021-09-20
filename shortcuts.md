@@ -19,7 +19,7 @@
 | {Num.}         | Play/Pause (Media Key)                    |
 | {Num0}         | Toggle Microphone (Toggle Voicemeeter)    |
 | {Num1}         | Firefox                                   |
-| {Num2}         | Open "This PC" (Explorer)                 |
+| {Num2}         | Windows Terminal                          |
 | {Num3}         | Obsidian                                  |
 | {Num4}         | MusicBee                                  |
 | {Num5}         | OBS Studio                                |
@@ -32,7 +32,7 @@
 
 | Key            | Description                               |
 |----------------|-------------------------------------------|
-| {Num/}         | N/A                                       |
+| {Num/}         | Toggle Freeze Filter (OBS Studio)         |
 | {Num*}         | Toggle AFK Mode (OBS Studio)              |
 | {Num-}         | Volume Down (Media Key)                   |
 | {Num+}         | Volume Up (Media Key)                     |
@@ -50,7 +50,7 @@
 | {Num8}         | Go to Scene 8 (OBS Studio)                |
 | {Num9}         | N/A                                       |
 
-## Mode 3: Application-Specific Shortcuts
+## Mode 3: Context-Aware Mode
 
 | Key            | Description                               |
 |----------------|-------------------------------------------|
