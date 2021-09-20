@@ -2,10 +2,11 @@
 
 My setup for using a second keyboard as a macropad.
 
-**NOTEs**:
+**Notes**:
 
 - ~~This version is not (yet) working properly. `Main.ahk` cannot read `%keyfile%`.~~
 - This version is experimental. `config.txt` is currently unused; Variables are hardcoded.
+- I will rewrite this project from scratch. I am thinking of a (hopefully) better design.
 
 ## How to Use
 
