@@ -2,15 +2,12 @@
 
 My setup for using a second keyboard as a macropad.
 
-**Notes**:
-
-- ~~This version is not (yet) working properly. `Main.ahk` cannot read `%keyfile%`.~~
-- This version is experimental. `config.txt` is currently unused; Variables are hardcoded.
-- I will rewrite this project from scratch. I am thinking of a (hopefully) better design.
-
 ## How to Use
 
-1. Plug your second keyboard (your macropad) to your system.
+1. Install [Python](https://python.org/) and [LuaMacros](https://github.com/me2d13/luamacros) on your computer.
+2. Plug your second keyboard (your macropad) to your system.
+2. Run *LuaMacros* and open `setup.lua`.
+
 2. Edit `config.txt` to your needs. If you don't know the Keyboard ID of your second keyboard, run `get_key_codes.lua` in LuaMacros to automatically fill it in.
 3. Edit `main.ahk` to your needs. (Refer to [AutoHotkey manual](https://www.autohotkey.com/docs/AutoHotkey.htm))
 4. Edit `start-startup-cmds.py` to your needs. (if you want to use it)

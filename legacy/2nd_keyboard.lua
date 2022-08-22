@@ -10,7 +10,7 @@ local configfile = "D:/Scripts/MacroKeyboard/config.txt";
 
 print("Reading configuration file `" .. configfile .. "`...")
 
-function split_str(inputstr, sep) -- From `https://stackoverflow.com/a/7615129/15376542`
+function splitStr(inputstr, sep) -- From `https://stackoverflow.com/a/7615129/15376542`
     if sep == nil then  -- If separator is nil then use whitespace.
         sep = "%s";
     end
@@ -29,15 +29,15 @@ local keyfile = nil;
 
 -- Read config file.
 local config = io.open(configfile, 'r'):read("*all");
-local config = split_str(config, '\n');  -- Convert config file to a table.
+local config = splitStr(config, '\n');  -- Convert config file to a table.
 
 for line, value in pairs(config) do
     -- Parse config data
     if string.find(value, "keyboard_id=") ~= nil then
-        kbID = split_str(value, '=')[2];
+        kbID = splitStr(value, '=')[2];
 
     elseif string.find(value, "keyfile=") ~= nil then
-        keyfile = split_str(value, '=')[2];
+        keyfile = splitStr(value, '=')[2];
     end
 end
 

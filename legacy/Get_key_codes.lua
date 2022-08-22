@@ -6,7 +6,7 @@ clear();
 -- Change the path here if you want to use a different configuration file.
 local configfile = "./config.txt";
 
-function split_str(inputstr, sep) -- From `https://stackoverflow.com/a/7615129/15376542`
+function splitStr(inputstr, sep) -- From `https://stackoverflow.com/a/7615129/15376542`
     if sep == nil then  -- If separator is nil then use whitespace.
         sep = "%s";
     end
@@ -40,16 +40,16 @@ for id,data in pairs(devices) do
                 for k, v in pairs(data) do
                     if k == "SystemId" then
                         system_id = v;  -- Get the SystemID value of the keyboard
-                        keyboard_id = split_str(system_id, "&")
-                        keyboard_id = split_str(keyboard_id[2], "&")[1]
+                        keyboard_id = splitStr(system_id, "&")
+                        keyboard_id = splitStr(keyboard_id[2], "&")[1]
                         print("  Keyboard ID: " .. keyboard_id)
                         -- Read the configuration file first
                         local config = io.open(configfile, 'r');
                         local configdata = config:read("*all");
-                        local configdata = split_str(configdata, '\n');
+                        local configdata = splitStr(configdata, '\n');
                         local new_configdata = {};
                         for line, data in pairs(configdata) do
-                            local dat = split_str(data, '=');
+                            local dat = splitStr(data, '=');
                             if dat[1] == "keyboard_id" then
                                 table.insert(new_configdata, "keyboard_id=" .. keyboard_id);
 
