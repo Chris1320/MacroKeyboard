@@ -6,7 +6,7 @@ file that will be used by the MacroKeyboard system.
 ]]--
 
 Name = "MacroKeyboard"
-Version = {0, 0, 3}
+Version = {0, 0, 4}
 Title = Name .. " v" .. table.concat(Version, ".")
 
 --[[
@@ -77,6 +77,7 @@ local function splitStr(input_str, separator)
     end
 
     return result
+
 end
 
 local ConfigHandler = {
@@ -104,7 +105,22 @@ local ConfigHandler = {
             local contents = splitStr(file:read("*all"), '\n')
             file:close()  -- We're done reading the file. Close it.
             for _, line in ipairs(contents) do
-                local k, v = splitStr(line, '=')
+                local k = nil
+                local v = nil
+                -- See the comment to the same logic in ConfigHandler.set() for
+                -- the explanation to this atrocity.
+                for _, l in pairs(splitStr(line, '=')) do
+                    -- Each line `l` can be the key or value of the splitted line.
+                    -- _ is the index (not needed)
+                    if not k then  -- If k is nil, then l is the key.
+                        k = l
+
+                    else
+                        v = l  -- If the key is already set, set l as the value.
+                        break  -- Break loop because we now have k and v.
+
+                    end
+                end
                 if k == key then
                     return v
 
@@ -123,16 +139,31 @@ local ConfigHandler = {
             :returns int: 0 if successful, otherwise non-zero.
         ]]--
 
-        -- FIXME: Only the new key/value pair remains in the configuration file.
-
         local file = io.open(configpath, "r")  -- Read its contents first.
         local new_contents = {}
         local value_changed = false
         if file then  -- Skip reading file if file does not exist.
-            local contents = splitStr(file:read("*all"))
+            local contents = splitStr(file:read("*a"), '\n')
             file:close()  -- Close the file.
             for _, line in pairs(contents) do
-                local k, v = splitStr(line, '=')
+                local k = nil
+                local v = nil
+                -- ? I have no idea why we need the for loop below instead of just
+                -- ? unpacking the table using the following:
+                -- local k, v = splitStr(line, '=')
+
+                for _, l in pairs(splitStr(line, '=')) do
+                    -- Each line `l` can be the key or value of the splitted line.
+                    -- _ is the index (not needed)
+                    if not k then  -- If k is nil, then l is the key.
+                        k = l
+
+                    else
+                        v = l  -- If the key is already set, set l as the value.
+                        break  -- Break loop because we now have k and v.
+
+                    end
+                end
                 if k == key then  -- Change the value of key if it already exists in the table.
                     v = value
                     value_changed = true
@@ -255,6 +286,7 @@ function Main()
     print("[i] Writing configuration to " .. config["configfile_path"] .. "... Done!")
 
     return 0
+
 end
 
 return Main()
