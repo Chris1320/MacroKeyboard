@@ -4,6 +4,8 @@ My setup for using a second keyboard as a macropad.
 
 **Notes**:
 
+> I am currently rewriting [MacroKeyboard](https://github.com/Chris1320/MacroKeyboard) on my free time. I plan to rewrite the AutoHotKey/LuaMacros scripts for easier deployment, and write a new version as a standalone application.
+
 - ~~This version is not (yet) working properly. `Main.ahk` cannot read `%keyfile%`.~~
 - This version is experimental. `config.txt` is currently unused; Variables are hardcoded.
 - I will rewrite this project from scratch. I am thinking of a (hopefully) better design.
