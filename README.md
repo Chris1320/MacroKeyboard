@@ -9,6 +9,7 @@ My setup for using a second keyboard as a macropad.
 - ~~This version is not (yet) working properly. `Main.ahk` cannot read `%keyfile%`.~~
 - This version is experimental. `config.txt` is currently unused; Variables are hardcoded.
 - I will rewrite this project from scratch. I am thinking of a (hopefully) better design.
+- Some numpads toggle their `Num Lock` states even if AutoHotKey intercepts the keypress. This results to AutoHotKey accidentally toggling the `Num Lock` state, instead of keeping its current state.
 
 ## How to Use
 
