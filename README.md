@@ -6,7 +6,7 @@ My setup for using a second keyboard as a macropad.
 
 1. Install [Python](https://python.org/) and [LuaMacros](https://github.com/me2d13/luamacros) on your computer.
 2. Plug your second keyboard (your macropad) to your system.
-2. Run *LuaMacros* and open `setup.lua`.
+2. Run *LuaMacros* and open `dump.lua`. This will create a file named `dump.txt`.
 
 2. Edit `config.txt` to your needs. If you don't know the Keyboard ID of your second keyboard, run `get_key_codes.lua` in LuaMacros to automatically fill it in.
 3. Edit `main.ahk` to your needs. (Refer to [AutoHotkey manual](https://www.autohotkey.com/docs/AutoHotkey.htm))
